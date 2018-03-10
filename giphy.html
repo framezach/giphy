@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Giphy</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+      crossorigin="anonymous">
+
+  </head>
+
+
+  <body>
+    <!-- BUTTONS! -->
+    <div class="container">
+      <div id="animalsButtons">
+        <button class="btn-info animal" data-name="Dog">Dog</button>
+        <button class="btn-info animal" data-name="Cat">Cat</button>
+        <button class="btn-info animal" data-name="Shark">Shark</button>
+        <button class="btn-info animal" data-name="Pig">Pig</button>
+        <button class="btn-info animal" data-name="Goat">Goat</button>
+        <button class="btn-info animal" data-name="Monkey">Monkey</button>
+        <button class="btn-info animal" data-name="Dragon">Dragon</button>
+        <button class="btn-info animal" data-name="Hare">Hare</button>
+      </div>
+    </div>
+
+    <div id="gifs">
+      <h2>Add an Animal</h2>
+      <form id="gif-form">
+        <label for="gif-input"></label>
+        <input type="text" value="  " id="gif-input">
+        <br>
+        <input type="submit" name="Button" class="btn btn-success" id="theButton">
+      </form>
+    </div>
+<!-- TO DO: Figure out why my button maker only partially works. Currently, all it does is flash an icon of a button, but the button immediately disappears. Second thing is I need to figure out why my images aren't loading. I feel as though I have the correct dot notation to reveal an image but it just isn't working... -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+      // Button javascript
+      $('button').on('click', function () {
+        var animal = $(this).data('name');
+        var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + animal +
+          "&api_key=5GjYbajtfvngc5rEmgReWQST8BTtr7yl&limit=5";
+
+        $.ajax({
+            url: queryURL,
+            method: 'GET'
+          })
+          .done(function (response) {
+            console.log(response);
+            var results = response.data;
+
+            // Loop through results
+
+            for (var i = 0; i < results.length; i++) {
+              var animalDiv = $('<div>');
+              // This variable is where we're going to append all of our gifs to.
+              var p = $('<p>');
+              p.text(results[i].rating);
+              // This is our image, we're giving it attributes from our API array by looping through it and using our i variable to determine what information to grab.
+              var animalImage = $('<img>');
+              animalImage.addClass('anImg');
+
+              // So here's where one of my issues is, it's not actually grabbing the url. I tried doing .url, which is what I thought I was supposed to do, but that came back with an error that I just can't seem to figure out. So I tried _url and that didn't give me an error but obviously it's not the answer because my image still doesn't pop up.
+
+              animalImage.attr('src', results[i].images.fixed_height_url);
+              animalImage.attr('data-still', results[i].images.fixed_height_stil_url);
+              animalImage.attr('data-animate', results[i].images.fixed_height_url).attr('data-state', 'still');
+
+              animalDiv.append(p);
+              animalDiv.append(animalImage);
+              animalDiv.prependTo('#gifs');
+            }
+            // pausing our gif
+            $('.anImg').on('click', function () {
+              var state = $(this).attr('data-state');
+              console.log(this);
+
+              if (state == 'still') {
+                $(this).attr('src', $(this).data('animate'));
+                $(this).attr('data-state', 'animate');
+              } else {
+                $(this).attr('src', $(this).data('still'));
+                $(this).attr('data-state', 'still');
+              }
+            })
+          })
+      })
+
+      var gifs = [''];
+
+      $('#theButton').on('click', function () {
+        var animalButton = $("#gif-input").val();
+        // add new animal
+
+        var newButton = $("<button>").addClass("btn btn-info animal").attr('data-name', animalButton).html(
+          animalButton);
+
+        $("#animalsButtons").append(newButton);
+
+        queryURL = "https://api.giphy.com/v1/gifs/search?q=" + animalButton +
+          "&api_key=5GjYbajtfvngc5rEmgReWQST8BTtr7yl&limit=5";
+
+        $.ajax({
+            url: queryURL,
+            method: 'GET'
+          })
+
+          .done(function (response) {
+            var results = response.data;
+
+            for (var k = 0; k < results.length; k++) {
+              var animalDiv = $('<div>');
+              var p = $('<p>');
+              p.text(results[k].rating);
+
+              var animalImage = $("<img>");
+              animalImage.addClass('anImg');
+              animalImage.attr('src', results[k].images.fixed_height_still_url);
+              animalImage.attr('data-still', results[k].images.fixed_height_still_url);
+              animalImage.attr('data-animate', results[k].images.fixed_height_url).attr('data-state', 'still');
+              animalDiv.append(p);
+              animalDiv.append(animalImage);
+              animalDiv.prependTo("#gifs");
+            }
+            $('.anImg').on('click', function () {
+              var state = $(this).attr('data-state');
+              console.log(this);
+
+              if (state == 'still') {
+                $(this).attr('src', $(this).data('animate'));
+                $(this).attr('data-state', 'animate');
+              } else {
+                $(this).attr('src', $(this).data('still'));
+                $(this).attr('data-state', 'still');
+              }
+
+            });
+          });
+      });
+
+    </script>
+  </body>
+
+</html>
